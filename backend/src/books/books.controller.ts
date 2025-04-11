@@ -1,8 +1,8 @@
-import { Controller, Get, Post, Body } from '@nestjs/common';
-import { BooksService } from './books.service';
-import { Book } from '../entities/book.entity';
+import { Body, Controller, Get, Post } from "@nestjs/common";
+import { BooksService } from "./books.service";
+import { Book } from "../entities/book.entity";
 
-@Controller('books')
+@Controller("books")
 export class BooksController {
   constructor(private readonly booksService: BooksService) {}
 
@@ -12,7 +12,14 @@ export class BooksController {
   }
 
   @Post()
-  addBook(@Body() book: Partial<Book>): Promise<Book> {
+  addBook(
+    @Body() book: {
+      title: string;
+      price: number;
+      stock: number;
+      authorId: number;
+    },
+  ): Promise<Book> {
     return this.booksService.create(book);
   }
 }

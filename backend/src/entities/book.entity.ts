@@ -1,19 +1,20 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Author } from "./author.entity";
 
 @Entity()
 export class Book {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("uuid")
   id: string;
 
   @Column()
   title: string;
 
-  @Column()
-  author: string;
-
-  @Column('decimal')
+  @Column("decimal")
   price: number;
 
-  @Column('int')
+  @Column("int")
   stock: number;
+
+  @ManyToOne(() => Author, (author) => author.books, { eager: true })
+  author: Author;
 }
