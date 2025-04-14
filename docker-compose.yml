@@ -16,6 +16,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    profiles: ["csr"]
 
   ssr:
     build: ssr
@@ -24,6 +25,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    profiles: ["ssr"]
 
   db:
     image: postgres
