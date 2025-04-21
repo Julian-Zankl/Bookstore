@@ -20,6 +20,9 @@ RUN npm run build --prod
 FROM nginx:alpine
 COPY --from=0 /app/dist/bookstore-csr/browser /usr/share/nginx/html
 
+# Copy custom nginx configuration to handle routing
+COPY nginx.conf /etc/nginx/nginx.conf
+
 # Expose port for Angular app
 EXPOSE 80
 

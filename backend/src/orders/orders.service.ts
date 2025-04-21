@@ -1,58 +1,57 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Order } from '../entities/order.entity';
-import { Book } from '../entities/book.entity';
-import { CreateOrderDto } from './dto/create-order.dto';
+import { CreateOrderDto } from '../dto/create-order.dto';
+import { OrderItem } from 'src/entities/order-item.entity';
+import { Book } from 'src/entities/book.entity';
 
 @Injectable()
 export class OrdersService {
   constructor(
-    @InjectRepository(Order)
-    private ordersRepository: Repository<Order>,
-    private dataSource: DataSource,
+    @InjectRepository(Order) private orderRepository: Repository<Order>,
+    @InjectRepository(OrderItem)
+    private orderItemRepository: Repository<OrderItem>,
+    @InjectRepository(Book) private bookRepository: Repository<Book>,
   ) {}
 
-  async findAll(): Promise<Order[]> {
-    return this.ordersRepository.find({ relations: ['book'] });
-  }
-
   async create(createOrderDto: CreateOrderDto): Promise<Order> {
-    const { bookId, quantity } = createOrderDto;
+    const order = new Order();
+    order.createdAt = new Date();
+    order.total = 0;
 
-    // Start a transaction to ensure data integrity
-    return await this.dataSource.transaction(async (manager) => {
-      // Retrieve the book within the transaction
-      const book = await manager.findOne(Book, { where: { id: bookId } });
-      if (!book) {
-        throw new NotFoundException('Book not found');
-      }
+    const savedOrder = await this.orderRepository.save(order);
 
-      // Check if enough stock is available
-      if (book.stock < quantity) {
-        throw new BadRequestException('Not enough stock available');
-      }
+    let total = 0;
+    const orderItems: OrderItem[] = [];
 
-      // Reduce the book's stock
-      book.stock -= quantity;
-      await manager.save(book);
-
-      // Calculate total price
-      const total = +book.price * quantity;
-
-      // Create the order
-      const order = manager.create(Order, {
-        book,
-        quantity,
-        total,
+    for (const item of createOrderDto.items) {
+      // Fetch the book price using the bookId
+      const book = await this.bookRepository.findOne({
+        where: { id: item.bookId },
       });
 
-      // Save the order and return it
-      return await manager.save(order);
-    });
+      if (!book) {
+        throw new Error(`Book with ID ${item.bookId} not found`);
+      }
+
+      const orderItem = new OrderItem();
+      orderItem.bookId = book.id;
+      orderItem.quantity = item.quantity;
+      orderItem.order = savedOrder;
+
+      total += book.price * item.quantity;
+
+      orderItems.push(orderItem);
+    }
+
+    await this.orderItemRepository.save(orderItems);
+
+    savedOrder.total = total;
+    return this.orderRepository.save(savedOrder);
+  }
+
+  async findAll(): Promise<Order[]> {
+    return this.orderRepository.find({ relations: ['items'] });
   }
 }

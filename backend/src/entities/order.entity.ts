@@ -1,26 +1,17 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToOne,
-  CreateDateColumn,
-} from 'typeorm';
-import { Book } from './book.entity';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { OrderItem } from './order-item.entity';
 
 @Entity()
 export class Order {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => Book)
-  book: Book;
+  @OneToMany(() => OrderItem, (item) => item.order, { cascade: true })
+  items: OrderItem[];
 
-  @Column('int')
-  quantity: number;
-
-  @Column('decimal', { precision: 10, scale: 2 })
+  @Column()
   total: number;
 
-  @CreateDateColumn()
+  @Column()
   createdAt: Date;
 }
