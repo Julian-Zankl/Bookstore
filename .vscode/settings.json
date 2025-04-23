@@ -1,0 +1,3 @@
+{
+    "python.defaultInterpreterPath": "metrics/.venv/bin/python"
+}

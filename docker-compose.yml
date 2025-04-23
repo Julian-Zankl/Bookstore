@@ -48,5 +48,12 @@ services:
     ports:
       - 8080:8080
 
+  metrics:
+    build: metrics
+    ports:
+      - "3001:3001"
+    volumes:
+      - metrics.db:/app/db
+
 volumes:
   postgres_data:
