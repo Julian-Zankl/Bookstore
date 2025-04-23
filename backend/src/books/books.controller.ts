@@ -23,7 +23,7 @@ export class BooksController {
       title: string;
       price: number;
       stock: number;
-      authorId: number;
+      authorId: string;
     },
   ): Promise<Book> {
     return this.booksService.create(book);

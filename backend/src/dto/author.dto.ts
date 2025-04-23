@@ -1,7 +1,7 @@
-import { BookDto } from "./book.dto";
+import { BookDto } from './book.dto';
 
 export class AuthorDto {
-    id: number;
-    name: string;
-    books: BookDto[];
+  id: string;
+  name: string;
+  books: BookDto[];
 }

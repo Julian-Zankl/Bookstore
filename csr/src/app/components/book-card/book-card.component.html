@@ -1,13 +1,17 @@
-<div class="book-card p-4 shadow-lg rounded-lg border hover:shadow-xl transition-all flex flex-col cursor-pointer" (click)="goToBookDetail()">
+<div class="book-card p-4 shadow-lg rounded-lg border hover:shadow-xl transition-all flex flex-col cursor-pointer h-full" (click)="goToBookDetail()">
   <h2 class="text-xl font-semibold mb-2">{{ book.title }}</h2>
   <p class="text-sm text-gray-500 mb-1">Author: {{ book.author.name }}</p>
   <p class="text-base text-green-700 font-bold mb-2">{{ book.price }}€</p>
   <p class="text-sm text-gray-600 mb-4">Stock: {{ book.stock }}</p>
+
+  <!-- Sticks to bottom -->
   <button
     class="mt-auto bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded cursor-pointer"
-    (click)="addToCart()"
+    (click)="addToCart($event)"
     [disabled]="book.stock === 0"
   >
     {{ book.stock === 0 ? 'Out of Stock' : 'Add to Cart' }}
   </button>
 </div>
+
+<app-toast [message]="toastMessage" [show]="showToast"></app-toast>

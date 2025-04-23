@@ -20,7 +20,7 @@
     <div *ngFor="let item of (order.items | orderBooks | async)" class="flex justify-between items-center py-3 border-b">
       <span class="text-sm font-medium text-gray-700">{{ item.book.title }}</span>
       <span class="text-sm text-gray-500">{{ item.book.price }}€ x {{ item.quantity }}</span>
-      <span class="text-sm text-indigo-600 font-semibold">€{{ item.book.price * item.quantity }}</span>
+      <span class="text-sm text-indigo-600 font-semibold">{{ (item.book.price * item.quantity) | number : '1.2-2' }}€</span>
     </div>
 
     <!-- Total Amount -->

@@ -6,6 +6,7 @@ import { OrderService } from '../../services/order.service';
 import { CreateOrderDto, CreateOrderResponse } from '../../dto/create-order.dto';
 import { firstValueFrom } from 'rxjs';
 import { CartBooksPipe } from '../../pipes/cart-books.pipe';
+import { Router } from '@angular/router';
 
 @Component({
   standalone: true,
@@ -17,6 +18,7 @@ import { CartBooksPipe } from '../../pipes/cart-books.pipe';
 export class CartComponent implements OnInit {
   private cartService = inject(CartService);
   private orderService = inject(OrderService);
+  private router = inject(Router);
 
   protected items: CartItem[] = [];
   protected totalAmount = 0;
@@ -39,6 +41,9 @@ export class CartComponent implements OnInit {
       console.log(`Order was created: ${response}`);
       this.cartService.clearCart();
       this.items = [];
+      this.router.navigate(['/success'], {
+        state: { order: response }
+      });
     }).catch((error: unknown) => {
       console.error('Failed to place order:', error);
     });

@@ -35,6 +35,10 @@ export class OrdersService {
         throw new Error(`Book with ID ${item.bookId} not found`);
       }
 
+      if (book.stock < item.quantity) {
+        throw new Error(`Not enough stock for book "${book.title}"`);
+      }
+
       const orderItem = new OrderItem();
       orderItem.bookId = book.id;
       orderItem.quantity = item.quantity;
@@ -43,6 +47,9 @@ export class OrdersService {
       total += book.price * item.quantity;
 
       orderItems.push(orderItem);
+
+      book.stock -= item.quantity;
+      await this.bookRepository.save(book);
     }
 
     await this.orderItemRepository.save(orderItems);

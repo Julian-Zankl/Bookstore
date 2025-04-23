@@ -32,7 +32,7 @@ export class BooksService {
     title: string;
     price: number;
     stock: number;
-    authorId: number;
+    authorId: string;
   }): Promise<Book> {
     const { title, price, stock, authorId } = book;
 

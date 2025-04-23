@@ -8,5 +8,5 @@ import { BookDetailComponent } from "../../components/book-detail/book-detail.co
   imports: [BookDetailComponent],
 })
 export class BookDetailPage {
-  @Input() id?: string;
+  @Input({required: true}) id!: string;
 }

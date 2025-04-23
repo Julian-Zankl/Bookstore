@@ -16,14 +16,14 @@
         <span class="min-w-[2rem] text-center">{{ item.quantity }}</span>
         <button (click)="updateQuantity(item.bookId, item.quantity + 1)" class="px-2 py-1 bg-gray-200 rounded cursor-pointer">+</button>
       </div>
-      <div class="font-semibold">€{{ item.book.price * item.quantity }}</div>
+      <div class="font-semibold">€{{ (item.book.price * item.quantity) | number : '1.2-2' }}</div>
     </li>
   </ul>
 
 
   <div *ngIf="items.length > 0" class="mt-6 flex justify-between items-center">
     <div class="text-lg font-medium text-gray-800">
-      Total: {{ totalAmount }}€
+      Total: {{ totalAmount | number : '1.2-2' }}€
     </div>
     <div class="space-x-3">
       <button (click)="clearCart()" class="bg-gray-100 text-gray-700 px-4 py-2 rounded hover:bg-gray-200 transition cursor-pointer">
