@@ -9,4 +9,4 @@ import { RouterModule } from '@angular/router';
   templateUrl: './order-success.component.html',
   styleUrl: './order-success.component.scss'
 })
-export class OrderSuccessComponent {}
+export class OrderSuccessPage {}

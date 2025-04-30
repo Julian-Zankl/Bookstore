@@ -30,7 +30,6 @@
     "@angular-devkit/build-angular": "^19.2.4",
     "@angular/cli": "^19.2.4",
     "@angular/compiler-cli": "^19.2.3",
-    "@cypress-audit/lighthouse": "^1.4.2",
     "cypress": "^14.3.0",
     "typescript": "~5.8.2"
   }

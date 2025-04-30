@@ -16,7 +16,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    profiles: ["csr"]
 
   ssr:
     build: ssr
@@ -25,7 +24,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    profiles: ["ssr"]
 
   db:
     image: postgres
@@ -53,7 +51,29 @@ services:
     ports:
       - "3001:3001"
     volumes:
-      - metrics.db:/app/db
+      - ./metrics/metrics.db:/src/app/db/metrics.db
+
+  chrome:
+    image: browserless/chrome
+    ports:
+      - "9222:3000"
+    environment:
+      - DEFAULT_BLOCK_ADS=true
+      - DEFAULT_HEADLESS=true
+      - DEFAULT_IGNORE_HTTPS_ERRORS=true
+
+  lighthouse:
+    build: lighthouse
+    depends_on:
+      - csr
+      - ssr
+      - chrome
+    environment:
+      - HOST_OS=${HOST_OS}
+      - TARGET_URL=${TARGET_URL}
+      - METRICS_API=${METRICS_API}
+    profiles: ["tests"]
+    entrypoint: ["sh", "-c", "while true; do sleep 1000; done"]
 
 volumes:
   postgres_data:
