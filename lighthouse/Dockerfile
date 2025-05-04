@@ -11,6 +11,9 @@ RUN npm install
 # Copy app source
 COPY . .
 
+COPY run.sh /usr/local/bin/run
+RUN chmod +x /usr/local/bin/run
+
 RUN npm run build
 
 CMD ["node", "dist/lighthouse.js"]

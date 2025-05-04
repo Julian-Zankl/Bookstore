@@ -1,47 +1,56 @@
-import lighthouse from 'lighthouse';
-import * as chromeLauncher from 'chrome-launcher';
-import axios from 'axios';
+import lighthouse from "lighthouse";
+import axios from "axios";
 const targetUrl = process.env.TARGET_URL;
 const metricsApi = process.env.METRICS_API;
-const hostOS = process.env.HOST_OS;
-if (!targetUrl || !metricsApi || !hostOS) {
-    console.error('Missing environment variables: TARGET_URL and/or METRICS_API and/or HOST_OS');
+const renderingType = process.env.RENDERING_TYPE;
+console.log("TARGET_URL:", process.env.TARGET_URL);
+if (!targetUrl || !metricsApi || !renderingType) {
+    console.error('Missing environment variables: TARGET_URL/METRICS_API/RENDERING_TYPE');
     process.exit(1);
 }
-async function runAudit() {
-    const chrome = await chromeLauncher.launch({ port: 3002, chromeFlags: [
-            '--headless',
-            '--no-sandbox',
-            '--disable-gpu',
-            '--disable-dev-shm-usage',
-        ] });
-    const options = { port: chrome.port, output: 'json' };
-    const runnerResult = await lighthouse(targetUrl, options);
-    const reportJson = runnerResult?.report;
-    const scores = {};
-    console.log(reportJson);
-    for (const [key, category] of Object.entries(runnerResult.lhr.categories)) {
-        // @ts-ignore
-        scores[key] = category.score;
-    }
-    const payload = {
-        operating_system: hostOS,
-        rendering_type: 'CSR',
-        report: reportJson,
-        timestamp: new Date().toISOString(),
-    };
-    try {
-        await axios.post(metricsApi, payload);
-        console.log('Lighthouse report sent successfully to metrics API.');
-    }
-    catch (err) {
-        console.error('Failed to send report to metrics API:', err);
-    }
-    console.log('Full Lighthouse JSON report:');
-    console.log(JSON.stringify(JSON.parse(reportJson), null, 2));
-    await chrome.kill();
+function round(value) {
+    return parseFloat(Number(value).toFixed(2));
 }
-runAudit().catch(err => {
-    console.error('Lighthouse audit failed:', err);
+async function runAudit() {
+    const options = {
+        port: 3000,
+        hostname: 'chrome',
+        onlyCategories: ['performance', 'accessibility', 'seo'],
+        onlyAudits: ['first-contentful-paint', 'largest-contentful-paint', 'cumulative-layout-shift', 'speed-index', 'total-blocking-time'],
+        output: 'json',
+    };
+    const runnerResult = await lighthouse(targetUrl, options);
+    const lhr = runnerResult?.lhr;
+    if (lhr) {
+        const report = {
+            performance: round(lhr.categories.performance.score),
+            accessibility: round(lhr.categories.accessibility.score),
+            seo: round(lhr.categories.seo.score),
+            firstContentfulPaint: round(lhr.audits['first-contentful-paint'].numericValue),
+            largestContentfulPaint: round(lhr.audits['largest-contentful-paint'].numericValue),
+            cumulativeLayoutShift: round(lhr.audits['cumulative-layout-shift'].numericValue),
+            speedIndex: round(lhr.audits['speed-index'].numericValue),
+            totalBlockingTime: round(lhr.audits['total-blocking-time'].numericValue),
+        };
+        console.log("Type:", renderingType);
+        console.log("Report:", report);
+        return;
+        const payload = {
+            operating_system: 'Windows',
+            rendering_type: renderingType,
+            report: report,
+        };
+        console.log("Payload:", payload);
+        try {
+            await axios.post(metricsApi, payload);
+            console.log("Lighthouse report sent successfully to metrics API.");
+        }
+        catch (err) {
+            console.error("Failed to send report to metrics API:", err);
+        }
+    }
+}
+runAudit().catch((err) => {
+    console.error("Lighthouse audit failed:", err);
     process.exit(1);
 });

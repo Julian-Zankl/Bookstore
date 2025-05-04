@@ -1,5 +1,6 @@
 import sqlite3
 import os
+import json
 
 DATABASE = os.path.join(os.getcwd(), 'db', 'metrics.db')
 
@@ -24,11 +25,22 @@ def insert_metric(operating_system, rendering_type, report, timestamp):
         cursor.execute('''
             INSERT INTO metrics (operating_system, rendering_type, report, timestamp)
             VALUES (?, ?, ?, ?)
-        ''', (operating_system, rendering_type, report, timestamp))
+        ''', (operating_system, rendering_type, json.dumps(report), timestamp))
         conn.commit()
 
 def get_all_metrics():
     with sqlite3.connect(DATABASE) as conn:
         cursor = conn.cursor()
         cursor.execute('SELECT * FROM metrics')
-        return cursor.fetchall()
+        rows = cursor.fetchall()
+        metrics = []
+        
+        for row in rows:
+            metrics.append({
+                "id": row[0],
+                "operating_system": row[1],
+                "rendering_type": row[2],
+                "report": json.loads(row[3]),
+                "timestamp": row[4]
+            })
+        return metrics

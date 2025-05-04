@@ -25,18 +25,7 @@ def receive_metrics():
 def fetch_metrics():
     try:
         metrics = get_all_metrics()
-        metrics_list = []
-        for metric in metrics:
-            metrics_list.append({
-                "id": metric[0],
-                "operating_system": metric[1],
-                "rendering_type": metric[2],
-                "report": metric[3],
-                "timestamp": metric[4]
-            })
-
-        return jsonify(metrics_list), 200
-
+        return jsonify(metrics), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
