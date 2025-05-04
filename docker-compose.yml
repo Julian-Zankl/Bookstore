@@ -68,11 +68,6 @@ services:
       - csr
       - ssr
       - chrome
-    environment:
-      - HOST_OS=${HOST_OS}
-      - TARGET_URL=${TARGET_URL}
-      - METRICS_API=${METRICS_API}
-    profiles: ["tests"]
     entrypoint: ["sh", "-c", "while true; do sleep 1000; done"]
 
 volumes:
