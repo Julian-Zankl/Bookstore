@@ -4,9 +4,11 @@ import axios from "axios";
 const targetUrl = process.env.TARGET_URL;
 const renderingType = process.env.RENDERING_TYPE;
 const os = process.env.HOST_OS;
+const iterationGroup = process.env.ITERATION_GROUP;
+const page = process.env.PAGE;
 
-if (!targetUrl || !renderingType) {
-  console.error('Missing environment variables: TARGET_URL/RENDERING_TYPE');
+if (!hasValidEnvironment) {
+  console.error('Missing environment variables');
   process.exit(1);
 }
 
@@ -21,8 +23,20 @@ interface LighthouseReport {
   totalBlockingTime: number;
 }
 
+interface Payload {
+  operating_system: string,
+  rendering_type: string,
+  report: LighthouseReport;
+  iteration_group: number,
+  page: string,
+}
+
 function round(value: number | null | undefined): number {
   return parseFloat(Number(value).toFixed(2));
+}
+
+function hasValidEnvironment(): boolean {
+  return Boolean(targetUrl && renderingType && os && iterationGroup && page);
 }
 
 async function runAudit() {
@@ -36,7 +50,7 @@ async function runAudit() {
   const runnerResult = await lighthouse(targetUrl, options);
   const lhr = runnerResult?.lhr;
 
-  if (lhr) {
+  if (lhr && hasValidEnvironment()) {
     const report: LighthouseReport = {
       performance: round(lhr.categories.performance.score) * 100,
       accessibility: round(lhr.categories.accessibility.score) * 100,
@@ -48,10 +62,12 @@ async function runAudit() {
       totalBlockingTime: round(lhr.audits['total-blocking-time'].numericValue),
     }
 
-    const payload = {
-      operating_system: os,
-      rendering_type: renderingType,
-      report: report,
+    const payload: Payload = {
+      operating_system: os!,
+      rendering_type: renderingType!,
+      report: report!,
+      iteration_group: parseInt(iterationGroup!),
+      page: page!,
     };
   
     console.log("Payload:", payload);

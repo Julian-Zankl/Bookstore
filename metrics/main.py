@@ -7,7 +7,7 @@ app = Flask(__name__)
 @app.route('/metrics', methods=['POST'])
 def receive_metrics():
     data = request.json
-    required_fields = ['operating_system', 'rendering_type', 'report']
+    required_fields = ['operating_system', 'rendering_type', 'report', 'iteration_group', 'page']
     
     if not all(field in data for field in required_fields):
         return jsonify({'error': 'Missing fields in request'}), 400
@@ -17,6 +17,8 @@ def receive_metrics():
         data['operating_system'],
         data['rendering_type'],
         data['report'],
+        data['iteration_group'],
+        data['page'],
         timestamp
     )
     return jsonify({'status': 'Report saved successfully'}), 201
