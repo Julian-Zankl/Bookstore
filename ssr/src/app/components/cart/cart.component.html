@@ -1,0 +1,39 @@
+<div class="max-w-3xl mx-auto p-6 mt-10 bg-white shadow-xl rounded-xl">
+  <h2 class="text-3xl font-bold text-indigo-600 mb-6">Your Cart</h2>
+
+  <div *ngIf="items.length === 0" class="text-center text-gray-500 py-12">
+    <p>Your cart is empty.</p>
+  </div>
+
+  <ul *ngIf="items.length > 0">
+    <li *ngFor="let item of (items | cartBooks | async)" class="mb-4 flex justify-between items-center border-b pb-4">
+      <div>
+        <div class="font-medium text-gray-800">{{ item.book.title }}</div>
+        <div class="text-sm text-gray-500">€{{ item.book.price }} each</div>
+      </div>
+      <div class="flex items-center space-x-2">
+        <button (click)="updateQuantity(item.bookId, item.quantity - 1)" class="px-2 py-1 bg-gray-200 rounded cursor-pointer">-</button>
+        <span class="min-w-[2rem] text-center">{{ item.quantity }}</span>
+        <button (click)="updateQuantity(item.bookId, item.quantity + 1)" class="px-2 py-1 bg-gray-200 rounded cursor-pointer">+</button>
+      </div>
+      <div class="font-semibold">€{{ (item.book.price * item.quantity) | number : '1.2-2' }}</div>
+    </li>
+  </ul>
+
+
+  <div *ngIf="items.length > 0" class="mt-6 flex justify-between items-center">
+    <div class="text-lg font-medium text-gray-800">
+      Total: {{ totalAmount | number : '1.2-2' }}€
+    </div>
+    <div class="space-x-3">
+      <button (click)="clearCart()" class="bg-gray-100 text-gray-700 px-4 py-2 rounded hover:bg-gray-200 transition cursor-pointer">
+        Clear Cart
+      </button>
+
+      <button (click)="checkout()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 cursor-pointer">
+        Checkout
+      </button>
+    </div>
+  </div>
+
+</div>

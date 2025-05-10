@@ -1,0 +1,19 @@
+<div *ngIf="loading" class="text-center py-10">Loading book details...</div>
+
+<div *ngIf="!loading && book" class="max-w-2xl mx-auto p-6 shadow rounded bg-white">
+  <h1 class="text-2xl font-bold mb-2">{{ book.title }}</h1>
+  <p class="text-gray-600 mb-4">by {{ book.author.name }}</p>
+
+  <div class="flex items-center justify-between mb-4">
+    <span class="text-xl font-semibold text-green-700">€{{ book.price }}</span>
+    <span class="text-sm text-gray-500">Stock: {{ book.stock }}</span>
+  </div>
+
+  <button
+    class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded cursor-pointer"
+    (click)="addToCart()"
+    [disabled]="book.stock === 0"
+  >
+    {{ book.stock === 0 ? 'Out of Stock' : 'Add to Cart' }}
+  </button>
+</div>
