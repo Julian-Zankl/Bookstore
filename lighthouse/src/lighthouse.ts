@@ -31,6 +31,8 @@ interface Payload {
   page: string,
 }
 
+type ThrottlingMethod = 'devtools'|'simulate'|'provided';
+
 function round(value: number | null | undefined): number {
   return parseFloat(Number(value).toFixed(2));
 }
@@ -43,11 +45,26 @@ async function runAudit() {
   const options = {
     port: 3000,
     hostname: 'chrome',
-    onlyCategories: ['performance', 'accessibility', 'seo'],
-    onlyAudits: ['first-contentful-paint', 'largest-contentful-paint', 'cumulative-layout-shift', 'speed-index', 'total-blocking-time'],
-    output: 'json' as OutputMode,
   };
-  const runnerResult = await lighthouse(targetUrl, options);
+  const config = {
+    extends: 'lighthouse:default',
+    settings: {
+      output: 'json' as OutputMode,
+      emulatedFormFactor: 'desktop',
+      onlyCategories: ['performance', 'accessibility', 'seo'],
+      onlyAudits: ['first-contentful-paint', 'largest-contentful-paint', 'cumulative-layout-shift', 'speed-index', 'total-blocking-time'],
+      throttlingMethod: 'devtools' as ThrottlingMethod,
+      throttling: {
+        rttMs: 150,
+        throughputKbps: 1600,
+        cpuSlowdownMultiplier: 4,
+        requestLatencyMs: 150,
+        downloadThroughputKbps: 1600,
+        uploadThroughputKbps: 768
+      }
+    }
+  }
+  const runnerResult = await lighthouse(targetUrl, options, config);
   const lhr = runnerResult?.lhr;
 
   if (lhr && hasValidEnvironment()) {
