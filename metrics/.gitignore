@@ -1,2 +1,2 @@
 .venv/
-metrics.db
+notebooks/__pycache__/
