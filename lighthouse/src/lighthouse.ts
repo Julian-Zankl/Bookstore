@@ -1,4 +1,4 @@
-import lighthouse, { OutputMode } from "lighthouse";
+import lighthouse from "lighthouse";
 import axios from "axios";
 
 const targetUrl = process.env.TARGET_URL;
@@ -6,11 +6,7 @@ const renderingType = process.env.RENDERING_TYPE;
 const os = process.env.HOST_OS;
 const iterationGroup = process.env.ITERATION_GROUP;
 const page = process.env.PAGE;
-
-if (!hasValidEnvironment) {
-  console.error('Missing environment variables');
-  process.exit(1);
-}
+const throttlingMethod = process.env.THROTTLING_METHOD;
 
 interface LighthouseReport {
   performance: number;
@@ -29,45 +25,43 @@ interface Payload {
   report: LighthouseReport;
   iteration_group: number,
   page: string,
+  throttling_method: ThrottlingMethod;
 }
 
-type ThrottlingMethod = 'devtools'|'simulate'|'provided';
+type ThrottlingMethod = 'simulate' | 'devtools' | 'provided';
 
 function round(value: number | null | undefined): number {
   return parseFloat(Number(value).toFixed(2));
 }
 
 function hasValidEnvironment(): boolean {
-  return Boolean(targetUrl && renderingType && os && iterationGroup && page);
+  return Boolean(targetUrl && renderingType && os && iterationGroup && page && throttlingMethod);
 }
 
 async function runAudit() {
+  if (!hasValidEnvironment()) {
+    console.error('Missing environment variables');
+    process.exit(1);
+  }
+
   const options = {
     port: 3000,
     hostname: 'chrome',
   };
+
   const config = {
     extends: 'lighthouse:default',
     settings: {
-      output: 'json' as OutputMode,
-      emulatedFormFactor: 'desktop',
       onlyCategories: ['performance', 'accessibility', 'seo'],
       onlyAudits: ['first-contentful-paint', 'largest-contentful-paint', 'cumulative-layout-shift', 'speed-index', 'total-blocking-time'],
-      throttlingMethod: 'devtools' as ThrottlingMethod,
-      throttling: {
-        rttMs: 150,
-        throughputKbps: 1600,
-        cpuSlowdownMultiplier: 4,
-        requestLatencyMs: 150,
-        downloadThroughputKbps: 1600,
-        uploadThroughputKbps: 768
-      }
+      throttlingMethod: throttlingMethod as ThrottlingMethod
     }
   }
+
   const runnerResult = await lighthouse(targetUrl, options, config);
   const lhr = runnerResult?.lhr;
 
-  if (lhr && hasValidEnvironment()) {
+  if (lhr) {
     const report: LighthouseReport = {
       performance: round(lhr.categories.performance.score) * 100,
       accessibility: round(lhr.categories.accessibility.score) * 100,
@@ -85,6 +79,7 @@ async function runAudit() {
       report: report!,
       iteration_group: parseInt(iterationGroup!),
       page: page!,
+      throttling_method: throttlingMethod as ThrottlingMethod
     };
   
     console.log("Payload:", payload);
